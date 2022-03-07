@@ -3,46 +3,82 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math/rand"
 	"os"
 	"strconv"
+	"time"
 )
 
 func main() {
-	getTodaysLaw()
+	fmt.Println(getTodaysLaw())
 }
 
 func getTodaysLaw() (law string) {
-	lastReadLine := getLastReadLineNumber()
-	// laws := readFile("tech_laws.file")
-	fmt.Println(lastReadLine)
+	laws := readLawFile("tech_laws.file")
+	lineToRead := getLawNumberToRead(len(laws))
 
-	return ""
+	return laws[lineToRead]
 }
 
-func getLastReadLineNumber() int {
-	const LAST_READ_LINE_ID = 1
+func getLawNumberToRead(max int) (lineToRead int) {
+	for runCount := 0; ; runCount++ {
+		rand.Seed(time.Now().UnixNano())
+		lineToRead = rand.Intn(rand.Intn(max-1+1) + 1)
+		statFileSlice := readStatFile()
+		if getPosition(statFileSlice, strconv.Itoa(lineToRead)) == -1 {
+			break
+		}
 
-	statFileOutput := readFile("stat")
-	
-	lastReadLine, err := strconv.Atoi(statFileOutput[LAST_READ_LINE_ID])
-
-	if err != nil {
-		fmt.Println(err)
-		lastReadLine = 1
-		writeFile(strconv.Itoa(lastReadLine))
+		if runCount == max {
+			clearStatFile()
+			runCount = 0
+		}
 	}
+	writeStatFile(fmt.Sprintln(lineToRead))
 
-	return lastReadLine
+	return
 }
 
-func writeFile(input string) {
-	err := os.WriteFile("stat", []byte(input), 0666)
+func clearStatFile() {
+	_, err := os.Create("stat")
 	if err != nil {
 		panic(err)
 	}
 }
 
-func readFile(fileName string) map[int]string {
+func writeStatFile(input string) {
+	// []byte(input), 0666
+	f, err := os.OpenFile("stat", os.O_CREATE|os.O_APPEND, os.ModeAppend)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	_, werr := f.WriteString(input)
+	if werr != nil {
+		panic(werr)
+	}
+}
+
+func readStatFile() []string {
+	f, err := os.Open("stat")
+
+	if err != nil {
+		fmt.Println("Ridi")
+		return nil
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	var dataSlice []string
+	for scanner.Scan() {
+		dataSlice = append(dataSlice, scanner.Text())
+	}
+
+	return dataSlice
+}
+
+func readLawFile(fileName string) map[int]string {
 	f, err := os.Open(fileName)
 
 	if err != nil {
@@ -60,4 +96,13 @@ func readFile(fileName string) map[int]string {
 	}
 
 	return dataMap
+}
+
+func getPosition(slice []string, val string) (position int) {
+	for i, v := range slice {
+		if v == val {
+			return i
+		}
+	}
+	return -1
 }
