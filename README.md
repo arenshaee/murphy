@@ -11,3 +11,10 @@ Display a murphy's law at the windows start up.
 6. Show the law at that position.
 7. Insert the number into _stat file_.
 8. Terminate the program.
+
+If you're on a windows machine or you have powershell core installed on your unix-based os, you can use `buildRun.ps1` file. just run it and it will build and run the project using proper arguments. If you're not, you have to build and run it manully, using commands below:
+```
+$ rsrc -manifest main.manifest -o rsrc.syso
+$ go build -ldflags="-H windowsgui"
+$ .\murphy.exe
+```
