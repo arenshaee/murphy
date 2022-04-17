@@ -21,6 +21,7 @@ func getLawNumberToRead(max int) (lineToRead int) {
 		rand.Seed(time.Now().UnixNano())
 		lineToRead = rand.Intn(rand.Intn(max-1+1) + 1)
 		statFileSlice := readStatFile()
+		
 		if getPosition(statFileSlice, strconv.Itoa(lineToRead)) == -1 {
 			break
 		}
@@ -56,7 +57,7 @@ func writeStatFile(input string) {
 	}
 }
 
-func readStatFile() []string {
+func readStatFile() (dataSlice []string) {
 	f, err := os.Open("stat")
 
 	if err != nil {
@@ -66,15 +67,14 @@ func readStatFile() []string {
 	defer f.Close()
 
 	scanner := bufio.NewScanner(f)
-	var dataSlice []string
 	for scanner.Scan() {
 		dataSlice = append(dataSlice, scanner.Text())
 	}
 
-	return dataSlice
+	return
 }
 
-func readLawFile(fileName string) map[int]string {
+func readLawFile(fileName string) (dataMap map[int]string) {
 	f, err := os.Open(fileName)
 
 	if err != nil {
@@ -84,12 +84,12 @@ func readLawFile(fileName string) map[int]string {
 	defer f.Close()
 
 	scanner := bufio.NewScanner(f)
-	dataMap := make(map[int]string)
+	dataMap = make(map[int]string)
 	lineNumber := 0
 	for scanner.Scan() {
 		lineNumber++
 		dataMap[lineNumber] = scanner.Text()
 	}
 
-	return dataMap
+	return
 }
